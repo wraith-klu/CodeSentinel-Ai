@@ -117,3 +117,4 @@ watchdog==6.0.0
 weasel==0.4.2
 wrapt==2.0.1
 zstandard==0.25.0
+streamlit-extras==0.6.1
