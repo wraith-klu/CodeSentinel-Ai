@@ -1,0 +1,13 @@
+[
+  {
+    "key": "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",
+    "label": "Label",
+    "description": "Description",
+    "type": "string",
+    "required": true,
+    "value": null,
+    "inputTypes": [
+      "string"
+    ]
+  }
+]

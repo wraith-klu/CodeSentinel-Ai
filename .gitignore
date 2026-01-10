@@ -1,0 +1,133 @@
+# ======================
+# Virtual Environments
+# ======================
+venv/
+backend/venv/
+frontend/venv/
+
+# ======================
+# Python cache / compiled files
+# ======================
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ======================
+# Jupyter
+# ======================
+.ipynb_checkpoints/
+
+# ======================
+# Environment variables
+# ======================
+.env
+.env.*
+
+# ======================
+# Streamlit
+# ======================
+.streamlit/
+
+# ======================
+# Logs
+# ======================
+*.log
+
+# ======================
+# Model / ML artifacts
+# ======================
+*.pkl
+*.joblib
+model/
+models/
+
+# ======================
+# Frontend (Node / React / Vite)
+# ======================
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+
+# ======================
+# OS / system files
+# ======================
+.DS_Store
+Thumbs.db
+
+# ======================
+# IDE / Editor
+# ======================
+.vscode/
+.idea/
+*.iml
+
+# ======================
+# Docker (optional future-proof)
+# ======================
+docker-compose.override.yml
+*.secret
+
+
+
+
+# # ----------------------
+# # Virtual Environments
+# # ----------------------
+# venv/
+# backend/venv/
+# frontend/venv/
+
+# # ----------------------
+# # Python cache / compiled files
+# # ----------------------
+# __pycache__/
+# *.pyc
+# *.pyo
+# *.pyd
+# *$py.class
+
+# # ----------------------
+# # Environment variables
+# # ----------------------
+# .env
+
+# # ----------------------
+# # Streamlit
+# # ----------------------
+# .streamlit/
+
+# # ----------------------
+# # OS / system files
+# # ----------------------
+# Thumbs.db
+# .DS_Store
+
+# # ----------------------
+# # IDE files
+# # ----------------------
+# .vscode/
+# .idea/
+# *.iml
+
+# # ----------------------
+# # Logs
+# # ----------------------
+# *.log
+
+# # ----------------------
+# # Model files
+# # ----------------------
+# model/export.pkl
+# *.pkl
+
+# # ----------------------
+# # Frontend (if using npm/yarn)
+# # ----------------------
+# frontend/node_modules/
+# frontend/dist/
+# frontend/build/
