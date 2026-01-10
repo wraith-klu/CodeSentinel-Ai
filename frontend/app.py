@@ -14,7 +14,7 @@ FOLLOWUP_URL = "http://127.0.0.1:8000/followup"
 # PAGE CONFIG
 # -------------------------------
 st.set_page_config(
-    page_title=" CodeSentinel AI - 🧠 A Code Smell Detection Agent",
+    page_title="CodeSentinel AI",
     page_icon="🧩",
     layout="wide",
 )
@@ -56,8 +56,8 @@ def popup_message(message, icon="ℹ️"):
 # HEADER
 # -------------------------------
 colored_header(
-    label="🧠 Code Smell Detection & Refactoring Dashboard",
-    description="Empowered by Hybrid Intelligence — AST + FastAI + LLM (Polaris Alpha)",
+    label="CodeSentinel AI🧠 - A Code Smell Detection & Refactoring Dashboard",
+    description="Empowered by Hybrid Intelligence — AST + FastAI + LLM (xiaomi/mimo-v2-flash)",
     color_name="blue-70",
 )
 st_lottie(ai_anim, height=180, key="ai_header")
