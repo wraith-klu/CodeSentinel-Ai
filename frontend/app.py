@@ -4,14 +4,16 @@ from streamlit_extras.colored_header import colored_header
 from streamlit_lottie import st_lottie
 import time
 import requests
-from pdf_downloader import download_pdf
 
 
 # -------------------------------
-# BACKEND ENDPOINTS
+# BACKEND ENDPOINTS (FIXED)
 # -------------------------------
-ANALYZE_URL = "http://127.0.0.1:8000/analyze"
-FOLLOWUP_URL = "http://127.0.0.1:8000/followup"
+BASE_API_URL = "https://codesentinel-ai.onrender.com"
+
+ANALYZE_URL = f"{BASE_API_URL}/analyze"
+FOLLOWUP_URL = f"{BASE_API_URL}/followup"
+
 
 # -------------------------------
 # PAGE CONFIG
@@ -470,7 +472,6 @@ if st.session_state.analysis_done:
 
 
 
-
 if st.button("📄 Download Discussion"):
 
     if not st.session_state.analysis_done:
@@ -478,17 +479,11 @@ if st.button("📄 Download Discussion"):
     else:
         result = st.session_state.last_result
 
-        # -------------------------------
-        # BUILD FOLLOW-UP DISCUSSION TEXT
-        # -------------------------------
         followup_text = ""
         for msg in st.session_state.chat_history:
             role = "USER" if msg["role"] == "user" else "AI"
             followup_text += f"\n{role}:\n{msg['content']}\n"
 
-        # -------------------------------
-        # FULL PDF CONTENT
-        # -------------------------------
         full_text = f"""
 ===========================
 INITIAL ANALYSIS
@@ -509,8 +504,19 @@ FOLLOW-UP DISCUSSION
 {followup_text}
 """
 
-        download_pdf(full_text)
-        st.success("PDF downloaded successfully!")
+        response = requests.post(
+            "https://codesentinel-ai.onrender.com/download-pdf",
+            json={"text": full_text}
+        )
+
+        st.download_button(
+            label="⬇️ Download PDF",
+            data=response.content,
+            file_name="analysis_report.pdf",
+            mime="application/pdf"
+        )
+
+
 # -------------------------------
 # FOOTER
 # -------------------------------
