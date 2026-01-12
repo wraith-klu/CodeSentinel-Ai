@@ -1,2 +1,4 @@
 streamlit
 requests
+streamlit-extras
+streamlit-lottie
