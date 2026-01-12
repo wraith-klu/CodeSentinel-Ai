@@ -120,8 +120,14 @@ def analyze_user_query(
 ) -> dict:
 
     # -------- Session Handling --------
+    # if session_id:
+    #     code = get_code(session_id)
     if session_id:
-        code = get_code(session_id)
+        stored = get_code(session_id)
+        if not stored:
+            return {"llm_analysis": {"error": "Session expired"}}
+        code = stored
+
         if not code.strip():
             return {"llm_analysis": {"error": "Invalid or expired session_id"}}
     else:
@@ -135,25 +141,40 @@ def analyze_user_query(
     model_prediction = predict_code_smell(code)
 
     # -------- Prepare Prompt --------
-    prompt = (
-        "You are a senior Python engineer.\n\n"
-        "MANDATORY TASKS:\n"
-        "1. Briefly explain code smells or issues (bullet points).\n"
-        "2. Provide a FULL optimized and refactored version of the code.\n"
-        "3. Optimized code MUST be inside ONE ```python``` block.\n"
-        "4. Follow Python best practices strictly.\n\n"
-        f"User Request:\n{user_query}\n\n"
-        f"AST Findings:\n{ast_output}\n\n"
-        f"ML Prediction:\n{model_prediction}\n\n"
-        f"Original Code:\n{code}\n\n"
-        "STRICT OUTPUT FORMAT (NO DEVIATION):\n\n"
-        "Explanation:\n"
-        "- bullet points only\n\n"
-        "Optimized Code:\n"
-        "```python\n"
-        "<full optimized code here>\n"
-        "```"
-    )
+    # prompt = (
+    #     "You are a senior Python engineer.\n\n"
+    #     "MANDATORY TASKS:\n"
+    #     "1. Briefly explain code smells or issues (bullet points).\n"
+    #     "2. Provide a FULL optimized and refactored version of the code.\n"
+    #     "3. Optimized code MUST be inside ONE ```python``` block.\n"
+    #     "4. Follow Python best practices strictly.\n\n"
+    #     f"User Request:\n{user_query}\n\n"
+    #     f"AST Findings:\n{ast_output}\n\n"
+    #     f"ML Prediction:\n{model_prediction}\n\n"
+    #     f"Original Code:\n{code}\n\n"
+    #     "STRICT OUTPUT FORMAT (NO DEVIATION):\n\n"
+    #     "Explanation:\n"
+    #     "- bullet points only\n\n"
+    #     "Optimized Code:\n"
+    #     "```python\n"
+    #     "<full optimized code here>\n"
+    #     "```"
+    # )
+    prompt = f"""
+You are a senior software engineer.
+
+User Question:
+{user_query}
+
+Original Code:
+{code}
+
+Instructions:
+- If user asks theory (complexity, explanation, etc) → answer ONLY that
+- If user asks to optimize → provide refactored code
+- If user asks about bugs → explain bugs
+- DO NOT give unnecessary refactor unless asked
+"""
 
     # -------- LLM Call with proper MiMo-V2-Flash input --------
     llm_response = ""
