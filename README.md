@@ -64,13 +64,13 @@ CodeSentinel AI is a smart developer assistant that analyzes your code to detect
 
 **🧠 Architecture**
 
-User
+- User
   │
   ▼
-Streamlit UI
+- Streamlit UI
   │
   ▼
-FastAPI Backend
+- FastAPI Backend
   ├── AST Analyzer
   ├── ML Model
   └── LLM Engine
