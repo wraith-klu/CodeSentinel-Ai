@@ -4,7 +4,6 @@
 
 CodeSentinel AI is a smart developer assistant that analyzes your code to detect code smells, suggest improvements, explain complexity, and support multi-turn follow-up queries. It uses **AST analysis + Machine Learning + LLMs** to provide accurate insights.
 
----
 
 ## 🌐 Live Demo
 
@@ -16,20 +15,18 @@ CodeSentinel AI is a smart developer assistant that analyzes your code to detect
 
 👉 [https://codesentinel-ai.onrender.com/](https://codesentinel-ai.onrender.com/)
 
----
 
 ## ✨ Features
 
-✔ Upload code files for analysis
-✔ Detect common code smells
-✔ Time & Space complexity explanation
-✔ AI-based refactoring suggestions
-✔ Multi-turn follow-up chat
-✔ Download full discussion as PDF
-✔ Hybrid AST + ML based analysis
-✔ Clean UI with Streamlit
+- ✔ Upload code files for analysis
+- ✔ Detect common code smells
+- ✔ Time & Space complexity explanation
+- ✔ AI-based refactoring suggestions
+- ✔ Multi-turn follow-up chat
+- ✔ Download full discussion as PDF
+- ✔ Hybrid AST + ML based analysis
+- ✔ Clean UI with Streamlit
 
----
 
 ## 🏗️ Tech Stack
 
@@ -53,7 +50,6 @@ CodeSentinel AI is a smart developer assistant that analyzes your code to detect
 * Backend → Render
 * Frontend → Streamlit Cloud
 
----
 
 ## 🧠 How It Works
 
@@ -65,7 +61,6 @@ CodeSentinel AI is a smart developer assistant that analyzes your code to detect
 6. Chat history stored per session
 7. Discussion can be downloaded as PDF
 
----
 
 **🧠 Architecture**
 
@@ -80,7 +75,6 @@ FastAPI Backend
   ├── ML Model
   └── LLM Engine
 
----
 
 ## 🚀 API Endpoints
 
@@ -142,7 +136,6 @@ code-smell-agent/
 └── README.md
 ```
 
----
 
 ## ⚙️ Run Locally
 
@@ -161,7 +154,6 @@ cd frontend
 streamlit run app.py
 ```
 
----
 
 ## 🔐 Environment Variables
 
@@ -172,13 +164,11 @@ OPENROUTER_API_KEY=your_api_key
 OPENROUTER_MODEL=xiaomi/mimo-v2-flash
 ```
 
----
 
 ## 📄 PDF Export Feature
 
 Users can download their complete conversation as a **PDF file** using the "Download Discussion" button.
 
----
 
 ## 🎯 Use Cases
 
@@ -188,14 +178,12 @@ Users can download their complete conversation as a **PDF file** using the "Down
 * Academic projects
 * Refactoring legacy code
 
----
 
 ## 🧑‍💻 Author
 
 **Saurabh Yadav**
 B.Tech Student | AI & Backend Developer
 
----
 
 ## ⭐ Future Enhancements
 
@@ -205,13 +193,7 @@ B.Tech Student | AI & Backend Developer
 * User authentication
 * History dashboard
 
----
 
 ## 📜 License
 
-This project is licensed under MIT License.
-
----
-
-
-Just say 😎
+This project is licensed under MIT License. 
