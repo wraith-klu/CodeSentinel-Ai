@@ -390,7 +390,7 @@ if analyze_clicked:
                     ANALYZE_URL,
                     data=data,
                     files=files,
-                    timeout=120   # Increased timeout for large files
+                    timeout=600   # Increased timeout for large files
                 )
                 response.raise_for_status()
                 result = response.json()
