@@ -5,16 +5,28 @@ from streamlit_lottie import st_lottie
 import time
 import requests
 
+import threading
+
 
 # -------------------------------
-# BACKEND ENDPOINTS (FIXED)
+# BACKEND ENDPOINTS
 # -------------------------------
+# ANALYZE_URL = "http://127.0.0.1:8000/analyze"
+# FOLLOWUP_URL = "http://127.0.0.1:8000/followup"
+
 BASE_API_URL = "https://codesentinel-ai.onrender.com"
 
 ANALYZE_URL = f"{BASE_API_URL}/analyze"
 FOLLOWUP_URL = f"{BASE_API_URL}/followup"
 
 
+def wake_backend():
+    try:
+        requests.get(BASE_API_URL, timeout=5)
+    except:
+        pass
+
+threading.Thread(target=wake_backend).start()
 # -------------------------------
 # PAGE CONFIG
 # -------------------------------
@@ -27,13 +39,15 @@ st.set_page_config(
 theme_mode = st.toggle("🌗 Dark / Light Mode", value=False)
 
 # -------------------------------
-# LOAD LOTTIE
+# LOAD LOTTIE (CACHED)
 # -------------------------------
+@st.cache_data
 def load_lottie_url(url: str):
     try:
         return requests.get(url).json()
     except Exception:
         return None
+
 
 ai_anim = load_lottie_url(
     "https://assets4.lottiefiles.com/packages/lf20_t24tpvcu.json"
@@ -300,7 +314,7 @@ with st.sidebar:
         """
     )
     st.markdown("---")
-    st.markdown("👨‍💻 **Wraith**")
+    st.markdown("Developed By👨‍💻: **Wraith**")
 
 # -------------------------------
 # FILE UPLOAD
@@ -320,9 +334,26 @@ with col_q:
         placeholder="What smells exist in this file?",
     )
 
+# with col_btn:
+#     analyze_clicked = st.button("🔍 Analyze", use_container_width=True)
+#     reset_clicked = st.button("🧹 Reset", use_container_width=True)
 with col_btn:
-    analyze_clicked = st.button("🔍 Analyze", use_container_width=True)
-    reset_clicked = st.button("🧹 Reset", use_container_width=True)
+
+    if "loading" not in st.session_state:
+        st.session_state.loading = False
+
+    analyze_clicked = st.button(
+        "🔍 Analyze",
+        use_container_width=True,
+        disabled=st.session_state.loading   # 🔥 IMPORTANT
+    )
+
+    reset_clicked = st.button(
+        "🧹 Reset",
+        use_container_width=True,
+        disabled=st.session_state.loading
+    )
+
 
 # -------------------------------
 # RESET
@@ -340,7 +371,11 @@ if analyze_clicked:
     elif not initial_query.strip():
         popup_message("Please enter a question", "⚠️")
     else:
-        with st.spinner("Analyzing code..."):
+        with st.status("Analyzing code...", expanded=True) as status:
+            status.write("Uploading file...")
+            status.write("Running AST analysis...")
+            status.write("Calling AI model...")
+
             try:
                 files = {
                     "file": (
@@ -352,7 +387,10 @@ if analyze_clicked:
                 data = {"user_query": initial_query}
 
                 response = requests.post(
-                    ANALYZE_URL, data=data, files=files
+                    ANALYZE_URL,
+                    data=data,
+                    files=files,
+                    timeout=120   # Increased timeout for large files
                 )
                 response.raise_for_status()
                 result = response.json()
