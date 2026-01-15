@@ -1,114 +1,116 @@
 from dotenv import load_dotenv
-from fastapi import FastAPI, UploadFile, Form, HTTPException
+from fastapi import FastAPI, UploadFile, Form, HTTPException, Body, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from agent_logic import analyze_user_query
-import os
+import os, uuid, asyncio
+
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.pagesizes import A4
-from fastapi.responses import FileResponse
-from fastapi import Body
-import uuid
 
-# Load env
+# =====================
+# ENV
+# =====================
 load_dotenv()
 
-app = FastAPI(title="Code Smell Detection API")
+app = FastAPI(title="CodeSentinel AI")
 
-# ================================
+# =====================
 # CORS
-# ================================
+# =====================
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # restrict in prod
+    allow_origins=["*"],   # restrict later
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ================================
-# FAVICON
-# ================================
-@app.get("/favicon.ico")
-def favicon():
-    path = os.path.join(os.path.dirname(__file__), "favicon.ico")
-    if os.path.exists(path):
-        return FileResponse(path)
-    return JSONResponse(content={"msg": "No favicon"}, status_code=404)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PDF_DIR = os.path.join(BASE_DIR, "pdfs")
+os.makedirs(PDF_DIR, exist_ok=True)
 
-# ================================
+# =====================
+# HEALTH (keep Render awake)
+# =====================
+@app.get("/health")
+def health():
+    return {"status": "alive"}
+
+# =====================
 # ROOT
-# ================================
+# =====================
 @app.get("/")
-def read_root():
+def root():
     return {"status": "API running 🚀"}
 
-# ================================
+# =====================
 # ANALYZE
-# ================================
+# =====================
 @app.post("/analyze")
 async def analyze_code(
     user_query: str = Form(...),
-    file: UploadFile = None
+    file: UploadFile = Form(...)
 ):
-    if file is None:
-        raise HTTPException(status_code=400, detail="No file uploaded")
-
     try:
-        code = (await file.read()).decode("utf-8")
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"File read failed: {e}"
-        )
+        code_bytes = await file.read()
+        code = code_bytes.decode("utf-8")
 
-    try:
-        result = analyze_user_query(
+        result = await asyncio.to_thread(
+            analyze_user_query,
             user_query=user_query,
             code=code
         )
-        return JSONResponse(content=result)
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Analysis failed: {e}"
-        )
 
-# ================================
-# FOLLOW-UP (FIXED)
-# ================================
+        return JSONResponse(content=result)
+
+    except Exception as e:
+        raise HTTPException(500, f"Analysis failed: {e}")
+
+
+# =====================
+# FOLLOW-UP
+# =====================
 @app.post("/followup")
 async def followup_query(
     user_query: str = Form(...),
     session_id: str = Form(...)
 ):
     try:
-        result = analyze_user_query(
+        result = await asyncio.to_thread(
+            analyze_user_query,
             user_query=user_query,
-            session_id=session_id   # 🔥 IMPORTANT FIX
-        )
-        return JSONResponse(content=result)
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Follow-up failed: {e}"
+            session_id=session_id
         )
 
-# ================================
-# DOWNLOAD PDF REPORT
-# ================================
+        return JSONResponse(content=result)
+
+    except Exception as e:
+        raise HTTPException(500, f"Follow-up failed: {e}")
+
+
+# =====================
+# AUTO DELETE FILE
+# =====================
+def cleanup_file(path: str):
+    try:
+        os.remove(path)
+    except:
+        pass
+
+
+# =====================
+# DOWNLOAD PDF
+# =====================
 @app.post("/download-pdf")
-async def download_pdf(payload: dict = Body(...)):
+async def download_pdf(
+    payload: dict = Body(...),
+    background_tasks: BackgroundTasks = None
+):
 
     text = payload.get("text")
-
     if not text:
-        raise HTTPException(status_code=400, detail="No text provided")
-
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    PDF_DIR = os.path.join(BASE_DIR, "pdfs")
-    os.makedirs(PDF_DIR, exist_ok=True)
+        raise HTTPException(400, "No text provided")
 
     file_path = os.path.join(
         PDF_DIR,
@@ -124,6 +126,9 @@ async def download_pdf(payload: dict = Body(...)):
         elements.append(Spacer(1, 10))
 
     doc.build(elements)
+
+    # auto delete after response
+    background_tasks.add_task(cleanup_file, file_path)
 
     return FileResponse(
         file_path,
