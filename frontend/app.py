@@ -20,9 +20,9 @@ import threading
 # FOLLOWUP_URL = "http://127.0.0.1:8000/followup"
 =======
 # Local testing:
-BASE_API_URL = "http://127.0.0.1:8000"
+# BASE_API_URL = "http://127.0.0.1:8000"
 
-# BASE_API_URL = "https://codesentinel-ai.onrender.com"
+BASE_API_URL = "https://codesentinel-ai.onrender.com"
 
 ANALYZE_URL = f"{BASE_API_URL}/analyze"
 FOLLOWUP_URL = f"{BASE_API_URL}/followup"
