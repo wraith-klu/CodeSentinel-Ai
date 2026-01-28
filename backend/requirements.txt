@@ -5,3 +5,7 @@ python-dotenv
 pydantic
 fastai
 reportlab
+
+# Force CPU-only PyTorch (Render compatible)
+torch==2.2.2+cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
