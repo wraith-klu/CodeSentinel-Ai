@@ -1,4 +1,7 @@
-# agent_logic.py
+# =====================================================
+# agent_logic.py — CodeSentinel AI
+# =====================================================
+
 import os
 import uuid
 
@@ -17,14 +20,16 @@ except Exception:
 # =====================================================
 # LOAD .env AND CONFIGURATION
 # =====================================================
-dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
+BASE_DIR = os.path.dirname(__file__)
+dotenv_path = os.path.join(BASE_DIR, ".env")
+
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
 else:
     print("⚠️ .env file not found at", dotenv_path)
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "xiaomi/mimo-v2-flash:free")
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "nvidia/nemotron-3-nano-30b-a3b:free")
 
 if not OPENROUTER_API_KEY:
     print("⚠️ OPENROUTER_API_KEY not found in .env!")
@@ -36,8 +41,20 @@ client = None
 if OpenAI and OPENROUTER_API_KEY:
     client = OpenAI(
         api_key=OPENROUTER_API_KEY,
-        base_url="https://openrouter.ai/api/v1"
+        base_url="https://openrouter.ai/api/v1",
+        default_headers={
+            "HTTP-Referer": "http://localhost",
+            "X-Title": "CodeSentinel AI"
+        }
     )
+
+    # ---------- AUTH VALIDATION ----------
+    try:
+        client.models.list()
+        print("✅ OpenRouter authenticated successfully")
+    except Exception as e:
+        print("❌ OpenRouter authentication failed:", e)
+        client = None
 
 # =====================================================
 # IN-MEMORY SESSION STORE
@@ -69,7 +86,7 @@ def analyze_ast(code: str):
             findings.append(f"Deep nesting detected at line {i+1}: {line.strip()}")
 
     # Detect duplicate operations (simplistic)
-    if "** 2" in code:
+    if "** 2" in code or "**2" in code:
         findings.append("Duplicate computation of numbers squared detected")
 
     # Detect unused variables
@@ -103,11 +120,15 @@ def predict_code_smell(code: str):
 # EXTRACT CODE FROM LLM RESPONSE
 # =====================================================
 def extract_optimized_code(text: str) -> str:
+    if not text:
+        return ""
+
     if "```python" in text:
         try:
             return text.split("```python")[1].split("```")[0].strip()
         except Exception:
             return ""
+
     return ""
 
 # =====================================================
@@ -120,8 +141,6 @@ def analyze_user_query(
 ) -> dict:
 
     # -------- Session Handling --------
-    # if session_id:
-    #     code = get_code(session_id)
     if session_id:
         stored = get_code(session_id)
         if not stored:
@@ -140,28 +159,9 @@ def analyze_user_query(
     # -------- ML Prediction --------
     model_prediction = predict_code_smell(code)
 
-    # -------- Prepare Prompt --------
-    # prompt = (
-    #     "You are a senior Python engineer.\n\n"
-    #     "MANDATORY TASKS:\n"
-    #     "1. Briefly explain code smells or issues (bullet points).\n"
-    #     "2. Provide a FULL optimized and refactored version of the code.\n"
-    #     "3. Optimized code MUST be inside ONE ```python``` block.\n"
-    #     "4. Follow Python best practices strictly.\n\n"
-    #     f"User Request:\n{user_query}\n\n"
-    #     f"AST Findings:\n{ast_output}\n\n"
-    #     f"ML Prediction:\n{model_prediction}\n\n"
-    #     f"Original Code:\n{code}\n\n"
-    #     "STRICT OUTPUT FORMAT (NO DEVIATION):\n\n"
-    #     "Explanation:\n"
-    #     "- bullet points only\n\n"
-    #     "Optimized Code:\n"
-    #     "```python\n"
-    #     "<full optimized code here>\n"
-    #     "```"
-    # )
+    # -------- Prompt --------
     prompt = f"""
-You are a senior software engineer.
+You are a senior software engineer and code reviewer.
 
 User Question:
 {user_query}
@@ -169,34 +169,44 @@ User Question:
 Original Code:
 {code}
 
+AST Findings:
+{ast_output}
+
+ML Prediction:
+{model_prediction}
+
 Instructions:
-- If user asks theory (complexity, explanation, etc) → answer ONLY that
-- If user asks to optimize → provide refactored code
-- If user asks about bugs → explain bugs
-- DO NOT give unnecessary refactor unless asked
+- If user asks theory → explain clearly.
+- If user asks to optimize → provide refactored code inside ONE ```python``` block.
+- If user asks about bugs → explain bugs.
+- Do NOT refactor unless asked.
 """
 
-    # -------- LLM Call with proper MiMo-V2-Flash input --------
+    # -------- LLM Call --------
     llm_response = ""
     if client:
         try:
-            response = client.responses.create(
-                model=OPENROUTER_MODEL,
-                input=[
-                    {"role": "system", "content": "You are a helpful assistant that improves Python code."},
+            completion = client.chat.completions.create(
+                model=OPENROUTER_MODEL,   # openai/gpt-oss-120b:free
+                messages=[
+                    {"role": "system", "content": "You are a senior software engineer."},
                     {"role": "user", "content": prompt}
                 ],
-                max_output_tokens=1500,
-                temperature=0.2
+                temperature=0.2,
+                max_tokens=1500,
             )
-            llm_response = response.output_text
+
+            llm_response = completion.choices[0].message.content
+
         except Exception as e:
             llm_response = f"⚠️ LLM call failed: {e}"
+
     else:
-        llm_response = "⚠️ LLM client not configured. Set OPENROUTER_API_KEY."
+        llm_response = "⚠️ LLM client not configured or authentication failed."
 
     # -------- Extract Optimized Code --------
     optimized_code = extract_optimized_code(llm_response)
+
     if not optimized_code:
         optimized_code = (
             "# ⚠️ No optimized code returned by LLM.\n"
@@ -209,7 +219,8 @@ Instructions:
             "def extra_function(a, b):\n"
             "    return a + b\n"
         )
-        update_code(session_id, optimized_code)
+
+    update_code(session_id, optimized_code)
 
     return {
         "llm_analysis": {
@@ -222,6 +233,6 @@ Instructions:
     }
 
 # ------------------------------- DEBUG -------------------------------
-print("OPENROUTER_API_KEY:", OPENROUTER_API_KEY)
+print("OPENROUTER_API_KEY:", OPENROUTER_API_KEY is not None)
 print("OPENROUTER_MODEL:", OPENROUTER_MODEL)
 print("LLM client initialized:", client is not None)

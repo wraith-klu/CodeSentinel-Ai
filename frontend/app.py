@@ -3,16 +3,44 @@ import requests
 from streamlit_extras.colored_header import colored_header
 from streamlit_lottie import st_lottie
 import time
+<<<<<<< HEAD
 import requests
 
 import threading
 
+=======
+import threading
+>>>>>>> 4771ee8 (update)
 
 # -------------------------------
 # BACKEND ENDPOINTS
 # -------------------------------
+<<<<<<< HEAD
 # ANALYZE_URL = "http://127.0.0.1:8000/analyze"
 # FOLLOWUP_URL = "http://127.0.0.1:8000/followup"
+=======
+# Local testing:
+BASE_API_URL = "http://127.0.0.1:8000"
+
+# BASE_API_URL = "https://codesentinel-ai.onrender.com"
+
+ANALYZE_URL = f"{BASE_API_URL}/analyze"
+FOLLOWUP_URL = f"{BASE_API_URL}/followup"
+DOWNLOAD_URL = f"{BASE_API_URL}/download-pdf"
+
+
+# -------------------------------
+# WAKE BACKEND (NON-BLOCKING)
+# -------------------------------
+def wake_backend():
+    try:
+        requests.get(BASE_API_URL, timeout=5)
+    except Exception:
+        pass
+
+threading.Thread(target=wake_backend, daemon=True).start()
+
+>>>>>>> 4771ee8 (update)
 
 BASE_API_URL = "https://codesentinel-ai.onrender.com"
 
@@ -44,7 +72,7 @@ theme_mode = st.toggle("🌗 Dark / Light Mode", value=False)
 @st.cache_data
 def load_lottie_url(url: str):
     try:
-        return requests.get(url).json()
+        return requests.get(url, timeout=10).json()
     except Exception:
         return None
 
@@ -55,6 +83,7 @@ ai_anim = load_lottie_url(
 success_anim = load_lottie_url(
     "https://assets10.lottiefiles.com/packages/lf20_jbrw3hcz.json"
 )
+
 # -------------------------------
 # CUSTOM CSS + POPUP STYLE
 # -------------------------------
@@ -248,26 +277,13 @@ pre {{
 </style>
 """, unsafe_allow_html=True)
 
-# st.markdown("""
-# <style>
-# .stApp { background: radial-gradient(circle at top left, #e6f0ff, #f9fbff); font-family: 'Inter', sans-serif; }
-# [data-testid="stSidebar"] { background: linear-gradient(180deg, #fdfdfd, #eef3ff); border-right: 1px solid #d4d8e0; box-shadow: 2px 0px 8px rgba(0,0,0,0.05); }
-# section[data-testid="stFileUploader"] { background: rgba(255,255,255,0.7); border-radius: 12px; padding: 16px; border: 1px solid #dcdcdc; backdrop-filter: blur(10px); }
-# div[data-testid="stExpander"] { background: rgba(255,255,255,0.85); border-radius: 14px !important; border: 1px solid #dce0e8; box-shadow: 0 3px 10px rgba(0,0,0,0.05); }
-# div.stButton > button { background: linear-gradient(90deg, #0072ff, #00c6ff); color: white; border-radius: 8px; padding: 0.5em 1em; font-weight: 600; border: none; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: all 0.2s ease-in-out; font-size: 0.9em; }
-# div.stButton > button:hover { transform: scale(1.07); background: linear-gradient(90deg, #00c6ff, #0072ff); }
-# h2, h3, h4 { color: #111; font-weight: 700; }
-# hr { border: 1px solid #d3d8e0; }
-# #popup-message { position: fixed; top: 20px; right: 20px; background: white; color: #111; padding: 12px 20px; border-radius: 10px; box-shadow: 0 3px 15px rgba(0,0,0,0.1); font-weight: 600; z-index: 9999; animation: fadeInOut 3s ease-in-out; }
-# @keyframes fadeInOut { 0% {opacity: 0; transform: translateY(-10px);} 10% {opacity: 1; transform: translateY(0);} 90% {opacity: 1;} 100% {opacity: 0; transform: translateY(-10px);} }
-# </style>
-# """, unsafe_allow_html=True)
 # -------------------------------
 # POPUP MESSAGE
 # -------------------------------
 def popup_message(message, icon="ℹ️"):
     st.markdown(
-        f"<div id='popup-message'>{icon} {message}</div>",
+        f"<div style='padding:10px;border-radius:8px;background:#eef2ff;'>"
+        f"{icon} {message}</div>",
         unsafe_allow_html=True,
     )
 
@@ -286,6 +302,10 @@ if "last_result" not in st.session_state:
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
+if "loading" not in st.session_state:
+    st.session_state.loading = False
+
+
 # -------------------------------
 # HEADER
 # -------------------------------
@@ -300,10 +320,6 @@ st_lottie(ai_anim, height=180)
 # SIDEBAR
 # -------------------------------
 with st.sidebar:
-    st.image(
-        "https://cdn-icons-png.flaticon.com/512/3296/3296716.png",
-        width=120,
-    )
     st.markdown("### ⚙️ Project Overview")
     st.markdown(
         """
@@ -338,6 +354,7 @@ with col_q:
 #     analyze_clicked = st.button("🔍 Analyze", use_container_width=True)
 #     reset_clicked = st.button("🧹 Reset", use_container_width=True)
 with col_btn:
+<<<<<<< HEAD
 
     if "loading" not in st.session_state:
         st.session_state.loading = False
@@ -346,6 +363,12 @@ with col_btn:
         "🔍 Analyze",
         use_container_width=True,
         disabled=st.session_state.loading   # 🔥 IMPORTANT
+=======
+    analyze_clicked = st.button(
+        "🔍 Analyze",
+        use_container_width=True,
+        disabled=st.session_state.loading
+>>>>>>> 4771ee8 (update)
     )
 
     reset_clicked = st.button(
@@ -353,7 +376,10 @@ with col_btn:
         use_container_width=True,
         disabled=st.session_state.loading
     )
+<<<<<<< HEAD
 
+=======
+>>>>>>> 4771ee8 (update)
 
 # -------------------------------
 # RESET
@@ -372,10 +398,14 @@ if analyze_clicked:
         popup_message("Please enter a question", "⚠️")
     else:
         with st.status("Analyzing code...", expanded=True) as status:
+<<<<<<< HEAD
             status.write("Uploading file...")
             status.write("Running AST analysis...")
             status.write("Calling AI model...")
 
+=======
+            st.session_state.loading = True
+>>>>>>> 4771ee8 (update)
             try:
                 files = {
                     "file": (
@@ -390,14 +420,19 @@ if analyze_clicked:
                     ANALYZE_URL,
                     data=data,
                     files=files,
+<<<<<<< HEAD
                     timeout=600   # Increased timeout for large files
+=======
+                    timeout=600
+>>>>>>> 4771ee8 (update)
                 )
                 response.raise_for_status()
                 result = response.json()
 
-                st.session_state.session_id = result["llm_analysis"][
-                    "session_id"
-                ]
+                st.session_state.session_id = result.get(
+                    "llm_analysis", {}
+                ).get("session_id")
+
                 st.session_state.last_result = result
                 st.session_state.analysis_done = True
                 st.session_state.chat_history = []
@@ -408,12 +443,15 @@ if analyze_clicked:
             except Exception as e:
                 st.error(str(e))
 
+            finally:
+                st.session_state.loading = False
+
 # -------------------------------
 # RESULTS
 # -------------------------------
 if st.session_state.analysis_done:
-    result = st.session_state.last_result
-    llm = result["llm_analysis"]
+    result = st.session_state.last_result or {}
+    llm = result.get("llm_analysis", {})
 
     st.markdown("---")
     st.markdown("## 📊 Analysis Results")
@@ -440,15 +478,38 @@ if st.session_state.analysis_done:
         else:
             st.info("No optimized code generated")
 
-    # ==================================================
-    # FOLLOW-UP CHATBOT (MULTI-TURN)
-    # ==================================================
+    # -------------------------------
+    # FOLLOW-UP CHATBOT
+    # -------------------------------
     st.markdown("---")
-    st.subheader("💬 Follow-Up Chat (Ask Anything About This Code)")
+    st.subheader("💬 Follow-Up Chat")
+
+    def question_box(text: str):
+        st.markdown(
+            f"""
+            <div style="
+                background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+                border-left: 6px solid #6366f1;
+                padding: 14px 18px;
+                margin: 12px 0;
+                border-radius: 10px;
+                font-weight: 600;
+                color: #111827;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            ">
+                🧑 <b>Your Question</b><br/>
+                {text}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     for msg in st.session_state.chat_history:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+        if msg["role"] == "user":
+            question_box(msg["content"])
+        else:
+            with st.chat_message("assistant"):
+                st.markdown(msg["content"])
 
     user_message = st.chat_input(
         "Ask any question about the analyzed code…"
@@ -458,9 +519,7 @@ if st.session_state.analysis_done:
         st.session_state.chat_history.append(
             {"role": "user", "content": user_message}
         )
-
-        with st.chat_message("user"):
-            st.markdown(user_message)
+        question_box(user_message)
 
         with st.chat_message("assistant"):
             with st.spinner("Thinking…"):
@@ -470,28 +529,18 @@ if st.session_state.analysis_done:
                         "session_id": st.session_state.session_id,
                     }
                     response = requests.post(
-                        FOLLOWUP_URL, data=payload
+                        FOLLOWUP_URL,
+                        data=payload,
+                        timeout=300
                     )
                     response.raise_for_status()
                     data = response.json()
 
-                    llm_block = data.get("llm_analysis")
-
-                    if llm_block:
-                        answer = llm_block.get(
-                            "llm_response", "No response generated."
-                        )
-                        optimized = llm_block.get(
-                            "optimized_code", ""
-                        )
-                    else:
-                        answer = (
-                            data.get("response")
-                            or data.get("answer")
-                            or data.get("message")
-                            or "No response generated."
-                        )
-                        optimized = ""
+                    llm_block = data.get("llm_analysis", {})
+                    answer = llm_block.get(
+                        "llm_response", "No response generated."
+                    )
+                    optimized = llm_block.get("optimized_code", "")
 
                     st.markdown(answer)
 
@@ -508,14 +557,21 @@ if st.session_state.analysis_done:
                 except Exception as e:
                     st.error(f"Follow-up failed: {e}")
 
+<<<<<<< HEAD
 
 
+=======
+# -------------------------------
+# DOWNLOAD PDF
+# -------------------------------
+>>>>>>> 4771ee8 (update)
 if st.button("📄 Download Discussion"):
 
     if not st.session_state.analysis_done:
         st.warning("Please analyze code first!")
     else:
-        result = st.session_state.last_result
+        result = st.session_state.last_result or {}
+        llm = result.get("llm_analysis", {})
 
         followup_text = ""
         for msg in st.session_state.chat_history:
@@ -527,14 +583,11 @@ if st.button("📄 Download Discussion"):
 INITIAL ANALYSIS
 ===========================
 
-USER QUESTION:
-{initial_query}
-
 AI RESPONSE:
-{result['llm_analysis']['llm_response']}
+{llm.get('llm_response','')}
 
 OPTIMIZED CODE:
-{result['llm_analysis']['optimized_code']}
+{llm.get('optimized_code','')}
 
 ===========================
 FOLLOW-UP DISCUSSION
@@ -542,6 +595,7 @@ FOLLOW-UP DISCUSSION
 {followup_text}
 """
 
+<<<<<<< HEAD
         response = requests.post(
             "https://codesentinel-ai.onrender.com/download-pdf",
             json={"text": full_text}
@@ -554,6 +608,24 @@ FOLLOW-UP DISCUSSION
             mime="application/pdf"
         )
 
+=======
+        try:
+            response = requests.post(
+                DOWNLOAD_URL,
+                json={"text": full_text},
+                timeout=120
+            )
+
+            st.download_button(
+                label="⬇️ Download PDF",
+                data=response.content,
+                file_name="analysis_report.pdf",
+                mime="application/pdf"
+            )
+
+        except Exception as e:
+            st.error(f"PDF download failed: {e}")
+>>>>>>> 4771ee8 (update)
 
 # -------------------------------
 # FOOTER
