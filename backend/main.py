@@ -16,9 +16,9 @@ import os, uuid, asyncio, traceback
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 
-# =====================
+# ======================
 # ENV
-# =====================
+# ======================
 load_dotenv()
 
 app = FastAPI(title="CodeSentinel AI")
