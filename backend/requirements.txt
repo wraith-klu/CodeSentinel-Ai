@@ -5,3 +5,4 @@ python-dotenv
 pydantic
 reportlab
 torch>=2.5,<2.6
+python-multipart
