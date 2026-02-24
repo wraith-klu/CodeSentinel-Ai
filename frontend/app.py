@@ -14,8 +14,14 @@ import threading
 # ANALYZE_URL = "http://127.0.0.1:8000/analyze"
 # FOLLOWUP_URL = "http://127.0.0.1:8000/followup"
 
+<<<<<<< HEAD
 # BASE_API_URL = "https://codesentinel-backend.onrender.com"
 BASE_API_URL = "http://127.0.0.1:8000"
+=======
+BASE_API_URL = "https://codesentinel-backend.onrender.com"
+
+# BASE_API_URL = "http://127.0.0.1:8000"
+>>>>>>> 44472ba3b2eb21f067cd780cb54bbcdcd8e260c8
 
 ANALYZE_URL = f"{BASE_API_URL}/analyze"
 FOLLOWUP_URL = f"{BASE_API_URL}/followup"

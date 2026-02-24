@@ -4,4 +4,9 @@ openai
 python-dotenv
 pydantic
 reportlab
+<<<<<<< HEAD
 python-multipart
+=======
+torch>=2.5,<2.6
+python-multipart
+>>>>>>> 44472ba3b2eb21f067cd780cb54bbcdcd8e260c8
