@@ -3,7 +3,5 @@ uvicorn
 openai
 python-dotenv
 pydantic
-# fastai
 reportlab
-torch>=2.5,<2.6
 python-multipart
